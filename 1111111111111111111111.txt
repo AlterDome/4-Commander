@@ -1,0 +1,154 @@
+	
+По умолчанию
+Да, но он почему-то не все файлы/папки находит. Не пойму, что не так.
+вот код:
+Код:
+procedure find(dir : string);
+var
+  sr : TSearchRec;
+begin
+if FindFirst(dir+'/*.*',faAnyFile, sr)=0 then
+repeat
+  if (sr.Name<>'.') and (sr.Name<>'..') then
+  begin
+      if ((sr.Attr and fahidden)=0) and ((sr.Attr and fadirectory)=0) then
+      begin
+        form1.list.Items.Add(dir+'/'+sr.Name);
+      end;
+      if ((sr.Attr and fahidden)=0) and ((sr.Attr and fadirectory)<>0) then
+      begin
+        find(dir+'/'+sr.Name);
+      end;
+  end;
+  form1.list.ItemIndex:= form1.list.Count-1;
+  application.ProcessMessages;
+until FindNext(sr)<>0;
+SysUtils.FindClose(sr);
+end;
+
+Код:
+if FindFirst(dir+'/*',faAnyFile, sr)=0 then
+вместо
+Код:
+if FindFirst(dir+'/*.*',faAnyFile, sr)=0 then
+
+
+**************************
+
+var
+  Form1: TForm1;
+  b : boolean;
+     
+implementation
+
+{ TForm1 }
+procedure TForm1.FindFile(dir, conffile:String);
+Var fs : TSearchRec;
+     
+begin
+
+findfirst(dir + '/*',faAnyFile,fs);
+repeat
+  if (fs.Name='.') or (fs.Name='..') then continue;
+
+  if (fs.Name='dev') then continue;
+  if (fs.Name='home') then continue;
+  if (fs.Name='mnt') then continue;
+
+  if (fs.Attr and faDirectory) <> 0
+     then findfile(dir + '/' + fs.name, conffile);
+
+  if conffile = fs.Name
+     then begin
+            edit2.Text := dir + '/' + fs.Name;
+            b := true;
+          end;
+  if b then exit;
+until findnext(fs) <> 0;
+end;
+
+
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+b := false;
+FindFile('', edit1.Text);
+showmessage('поиск окончен');
+end;   
+
+***************************************
+
+   procedure TForm2.Button1Click(Sender: TObject);
+
+
+
+   var
+
+
+
+     SearchFile : Textfile;
+     found: boolean;
+     search: string;
+
+
+
+    begin
+    search := edit1.text;
+    Assignfile(SearchFile, 'data.txt');
+    Reset(SearchFile);
+    found:= false;
+    repeat
+      found:= search = phone
+    until eof(searchfile) or found;
+    if found then
+    memo1.append(phone);
+    memo1.append(cusfname);
+    memo1.append(adress);
+    if not found then 
+      showmessage('member not found');
+   end;   
+
+***********************************************
+
+
+uses FileInfo;
+В основной программе описываем переменные:
+
+i: Integer;
+Version: TFileVersionInfo;
+MyFile, MyVersion: String; 
+За извлечение информации из бинарника отвечает TFileVersionInfo, остальные переменные являются служебными. Создаем класс Version и связываем его с именем исполняемого файла. Мы сделали проверку на наличие первого входного параметра. Если он задан, то рассматривается как имя внешнего исполняемого файла. Если же программа запускается без параметров, то берем имя нашей программы из нулевого параметра (в этом параметре всегда идет имя исполняемого файла).
+
+Version:=TFileVersionInfo.create(Nil);
+If (paramstr(1) <> '') then
+   MyFile:=paramstr(1)
+else
+  MyFile:=paramstr(0);
+Version.fileName:=MyFile;
+Зачитываем информацию и выводим ее на консоль:
+
+WriteLn(MyFile+' information');
+WriteLn('------------------------------------');
+With Version do begin
+  For i:=0 to VersionStrings.Count-1 do begin
+    If VersionCategories[I]='FileVersion' then
+      MyVersion := VersionStrings[i];
+    WriteLn('['+VersionCategories[I]+']'+'='+VersionStrings[i]);
+  end;
+end;
+Version.Free;
+
+
+**********************************************
+
+
+
+
+
+
+
+
+
+
+
+
